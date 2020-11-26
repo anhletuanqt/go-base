@@ -77,9 +77,10 @@ func Delete(DB *mongo.Database) fiber.Handler {
 func UpdateById(DB *mongo.Database) fiber.Handler {
 	collection := DB.Collection("questionsets")
 	ctx := context.Background()
-
+	validate := validator.New()
 	return func(c *fiber.Ctx) error {
-		var updatedDoc model.QuestionSet
+		// var updatedDoc model.QuestionSet
+		var updatedDoc map[string]interface{}
 		updatedInput := model.UpdateQuestionSet{
 			UpdatedAt: time.Now(),
 			Questions: []model.Question{},
@@ -89,18 +90,27 @@ func UpdateById(DB *mongo.Database) fiber.Handler {
 			return errors.Wrap(err, "")
 		}
 
+		if err := validate.Struct(updatedInput); err != nil {
+			return errors.Wrap(err, "")
+		}
+
+		// Add objectID, createdAt, updatedAt
+		for i := range updatedInput.Questions {
+			updatedInput.Questions[i].AddExtraData()
+		}
+
 		id := c.Params("id")
 		objID, err := primitive.ObjectIDFromHex(id)
 		if err != nil {
 			return err
 		}
 
-		updatedDate := map[string]interface{}{
+		updatedData := map[string]interface{}{
 			"$set": updatedInput,
 		}
 		opts := options.FindOneAndUpdate()
 		opts.SetReturnDocument(1)
-		if err := collection.FindOneAndUpdate(ctx, bson.D{{"_id", objID}}, updatedDate, opts).Decode(&updatedDoc); err != nil {
+		if err := collection.FindOneAndUpdate(ctx, bson.D{{"_id", objID}}, updatedData, opts).Decode(&updatedDoc); err != nil {
 			return errors.Wrap(err, "")
 		}
 
@@ -110,3 +120,6 @@ func UpdateById(DB *mongo.Database) fiber.Handler {
 		})
 	}
 }
+
+// Child ObjectID
+// Validate extra field

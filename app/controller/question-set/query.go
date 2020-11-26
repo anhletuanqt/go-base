@@ -3,6 +3,7 @@ package questionset
 import (
 	"base/app/model"
 	"context"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
@@ -28,7 +29,7 @@ func GetById(DB *mongo.Database) fiber.Handler {
 		if err := collection.FindOne(ctx, filter).Decode(&doc); err != nil {
 			return errors.Wrap(err, "")
 		}
-
+		fmt.Println("data", doc)
 		return c.JSON(fiber.Map{
 			"isSuccess": true,
 			"item":      doc,
