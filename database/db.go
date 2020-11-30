@@ -33,6 +33,12 @@ func Connect(conf *config.Config) {
 	if err != nil {
 		fmt.Println("Question set index err:", err)
 	}
+
+	// Index for facility
+	err = createFacilityIndex(db)
+	if err != nil {
+		fmt.Println("Facility index err:", err)
+	}
 }
 
 func GetDB() *mongo.Database {
@@ -41,6 +47,22 @@ func GetDB() *mongo.Database {
 
 func createQuestionSetIndex(db *mongo.Database) error {
 	coll := db.Collection("questionsets")
+
+	// 1. Lets define the keys for the index we want to create
+	mod := []mongo.IndexModel{
+		mongo.IndexModel{
+			Keys:    bson.M{"name": 1},
+			Options: options.Index().SetUnique(true),
+		},
+	}
+
+	_, err := coll.Indexes().CreateMany(context.Background(), mod)
+
+	return err
+}
+
+func createFacilityIndex(db *mongo.Database) error {
+	coll := db.Collection("facilities")
 
 	// 1. Lets define the keys for the index we want to create
 	mod := []mongo.IndexModel{

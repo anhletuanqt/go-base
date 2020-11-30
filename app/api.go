@@ -1,6 +1,7 @@
 package app
 
 import (
+	"base/app/controller/facilities"
 	questionset "base/app/controller/question-set"
 	"base/database"
 
@@ -20,4 +21,13 @@ func InitRoute(app *fiber.App) {
 	qs.Get("/:id", questionset.GetById(DB))
 	qs.Get("/", questionset.GetAll(DB))
 	qs.Put("/:id", questionset.UpdateById(DB))
+
+	// facilities
+	facilitiesRoutes := v1.Group("/facilities")
+	facilitiesRoutes.Post("/", facilities.Create(DB))
+	facilitiesRoutes.Delete("/:id", facilities.Delete(DB))
+	facilitiesRoutes.Put("/:id", facilities.Update(DB))
+
+	facilitiesRoutes.Get("/", facilities.GetAll(DB))
+	facilitiesRoutes.Get("/:id", facilities.GetById(DB))
 }
