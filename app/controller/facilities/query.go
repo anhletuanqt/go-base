@@ -3,15 +3,23 @@ package facilities
 import (
 	"context"
 
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/mongo"
 )
+
+type getAllParams struct {
+	Name   string `query:"name"`
+	Phone  string `query:"phone"`
+	Status string `query:"status"`
+	Cursor string `query:"cursor"`
+	Limit  int    `query:"limit"`
+	Order  string `query:"order"`
+}
 
 func GetById(db *mongo.Database) fiber.Handler {
 	collection := db.Collection("facilities")
@@ -48,9 +56,17 @@ func GetAll(db *mongo.Database) fiber.Handler {
 	ctx := context.Background()
 
 	return func(c *fiber.Ctx) error {
+		params := getAllParams{}
 		facilities := make([]map[string]interface{}, 0, 10)
 
-		cursor, err := collection.Find(ctx, bson.D{{}})
+		if err := c.QueryParser(&params); err != nil {
+			return errors.Wrap(err, "")
+		}
+
+		filter := buildGetAllQuery(params)
+		opts := buildGetAllOpts(params)
+		cursor, err := collection.Find(ctx, filter, opts)
+
 		if err != nil {
 			return errors.Wrap(err, "")
 		}
