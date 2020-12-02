@@ -39,6 +39,12 @@ func Connect(conf *config.Config) {
 	if err != nil {
 		fmt.Println("Facility index err:", err)
 	}
+
+	// Index for user
+	err = createUserIndex(db)
+	if err != nil {
+		fmt.Println("User index err:", err)
+	}
 }
 
 func GetDB() *mongo.Database {
@@ -68,6 +74,22 @@ func createFacilityIndex(db *mongo.Database) error {
 	mod := []mongo.IndexModel{
 		mongo.IndexModel{
 			Keys:    bson.M{"name": 1},
+			Options: options.Index().SetUnique(true),
+		},
+	}
+
+	_, err := coll.Indexes().CreateMany(context.Background(), mod)
+
+	return err
+}
+
+func createUserIndex(db *mongo.Database) error {
+	coll := db.Collection("users")
+
+	// 1. Lets define the keys for the index we want to create
+	mod := []mongo.IndexModel{
+		mongo.IndexModel{
+			Keys:    bson.M{"email": 1},
 			Options: options.Index().SetUnique(true),
 		},
 	}
