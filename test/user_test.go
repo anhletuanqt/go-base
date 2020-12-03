@@ -6,41 +6,41 @@ import (
 	"encoding/json"
 	"net/http/httptest"
 	"regexp"
-	"strings"
 
 	. "github.com/onsi/ginkgo"
 	"github.com/stretchr/testify/assert"
 )
 
-var _ = Describe("Facility", func() {
+var _ = Describe("User", func() {
 	t := GinkgoT()
 	// facilities := make([]helper.Facility, 0, 100)
 
 	Context("Query -", func() {
-		It("Get Facility By Id", func() {
-			mockFacility := helper.SeedFacility()
+		It("Get User By Id", func() {
+			mockFacility := helper.SeedUser()
 			var data map[string]interface{}
 			// http.Request
-			req := httptest.NewRequest("GET", BASE_URL+"/facilities/"+mockFacility.ID.Hex(), nil)
+			req := httptest.NewRequest("GET", BASE_URL+"/users/"+mockFacility.ID.Hex(), nil)
 			req.Header.Set("content-type", "application/json")
 
 			// http.Response
 			resp, _ := App.Test(req)
 			err := json.NewDecoder(resp.Body).Decode(&data)
 			assert.Equal(t, nil, err)
+
 			item := data["item"].(map[string]interface{})
 			assert.Equal(t, mockFacility.ID.Hex(), item["_id"])
 		})
 
 		Context("Get All -", func() {
 			BeforeEach(func() {
-				helper.SeedMultipleFacility(100)
+				helper.SeedMultipleUser(100)
 			})
 
 			It("Default", func() {
 				var data map[string]interface{}
 				// http.Request
-				req := httptest.NewRequest("GET", BASE_URL+"/facilities", nil)
+				req := httptest.NewRequest("GET", BASE_URL+"/users", nil)
 				req.Header.Set("content-type", "application/json")
 
 				// http.Response
@@ -49,11 +49,12 @@ var _ = Describe("Facility", func() {
 				assert.Equal(t, nil, err)
 				items := data["items"].([]interface{})
 				assert.Equal(t, 10, len(items))
+
 				for i, v := range items {
 					if i != len(items)-1 {
-						currentName := v.(map[string]interface{})["name"].(string)
-						nextName := items[i+1].(map[string]interface{})["name"].(string)
-						assert.Equal(t, true, nextName > currentName)
+						currentEmail := v.(map[string]interface{})["email"].(string)
+						nextEmail := items[i+1].(map[string]interface{})["email"].(string)
+						assert.Equal(t, true, nextEmail > currentEmail)
 					}
 				}
 			})
@@ -61,10 +62,10 @@ var _ = Describe("Facility", func() {
 			It("Search By Name", func() {
 				var data map[string]interface{}
 				// Mock facility
-				mockFacility := helper.SeedFacility()
-				filterName := mockFacility.Name[:2]
+				mockUser := helper.SeedUser()
+				filterName := mockUser.FullName[:2]
 				// http.Request
-				req := httptest.NewRequest("GET", BASE_URL+"/facilities?name="+filterName, nil)
+				req := httptest.NewRequest("GET", BASE_URL+"/users?fullName="+filterName, nil)
 				req.Header.Set("content-type", "application/json")
 
 				// http.Response
@@ -75,24 +76,24 @@ var _ = Describe("Facility", func() {
 
 				for i, v := range items {
 					current := v.(map[string]interface{})
-					matcher, _ := regexp.MatchString("(?i)"+filterName, current["name"].(string))
+					matcher, _ := regexp.MatchString("(?i)"+filterName, current["fullName"].(string))
 					assert.Equal(t, true, matcher)
 
 					if i != len(items)-1 {
-						currentName := current["name"].(string)
-						nextName := items[i+1].(map[string]interface{})["name"].(string)
-						assert.Equal(t, true, nextName > currentName)
+						currentEmail := current["email"].(string)
+						nextEmail := items[i+1].(map[string]interface{})["email"].(string)
+						assert.Equal(t, true, nextEmail > currentEmail)
 					}
 				}
 			})
 
-			It("Search By Phone", func() {
+			It("Search By Email", func() {
 				var data map[string]interface{}
 				// Mock facility
-				mockFacility := helper.SeedFacility()
-				filterPhone := mockFacility.Phone[1:3]
+				mockUser := helper.SeedUser()
+				filterEmail := mockUser.Email[:2]
 				// http.Request
-				req := httptest.NewRequest("GET", BASE_URL+"/facilities?phone="+filterPhone, nil)
+				req := httptest.NewRequest("GET", BASE_URL+"/users?email="+filterEmail, nil)
 				req.Header.Set("content-type", "application/json")
 
 				// http.Response
@@ -103,25 +104,25 @@ var _ = Describe("Facility", func() {
 
 				for i, v := range items {
 					current := v.(map[string]interface{})
-					matcher, _ := regexp.MatchString("(?i)"+filterPhone, current["phone"].(string))
+					matcher, _ := regexp.MatchString("(?i)"+filterEmail, current["email"].(string))
 					assert.Equal(t, true, matcher)
 
 					if i != len(items)-1 {
-						currentName := current["name"].(string)
-						nextName := items[i+1].(map[string]interface{})["name"].(string)
-						assert.Equal(t, true, nextName > currentName)
+						currentEmail := current["email"].(string)
+						nextEmail := items[i+1].(map[string]interface{})["email"].(string)
+						assert.Equal(t, true, nextEmail > currentEmail)
 					}
 				}
 			})
 
-			It("Combine Search By Phone and By Name", func() {
+			It("Combine Search By Email and By Name", func() {
 				var data map[string]interface{}
 				// Mock facility
-				mockFacility := helper.SeedFacility()
-				filterPhone := mockFacility.Phone[1:3]
-				filterName := mockFacility.Name[:2]
+				mockUser := helper.SeedUser()
+				filterName := mockUser.FullName[1:3]
+				filterEmail := mockUser.Email[:2]
 				// http.Request
-				req := httptest.NewRequest("GET", BASE_URL+"/facilities?phone="+filterPhone+"&name="+filterName, nil)
+				req := httptest.NewRequest("GET", BASE_URL+"/users?fullName="+filterName+"&email="+filterEmail, nil)
 				req.Header.Set("content-type", "application/json")
 
 				// http.Response
@@ -132,15 +133,15 @@ var _ = Describe("Facility", func() {
 
 				for i, v := range items {
 					current := v.(map[string]interface{})
-					matcherPhone, _ := regexp.MatchString("(?i)"+filterPhone, current["phone"].(string))
-					matcherName, _ := regexp.MatchString("(?i)"+filterName, current["name"].(string))
-					assert.Equal(t, true, matcherPhone)
+					matcherEmail, _ := regexp.MatchString("(?i)"+filterEmail, current["email"].(string))
+					matcherName, _ := regexp.MatchString("(?i)"+filterName, current["fullName"].(string))
+					assert.Equal(t, true, matcherEmail)
 					assert.Equal(t, true, matcherName)
 
 					if i != len(items)-1 {
-						currentName := current["name"].(string)
-						nextName := items[i+1].(map[string]interface{})["name"].(string)
-						assert.Equal(t, true, nextName > currentName)
+						currentEmail := current["email"].(string)
+						nextEmail := items[i+1].(map[string]interface{})["email"].(string)
+						assert.Equal(t, true, nextEmail > currentEmail)
 					}
 				}
 			})
@@ -148,7 +149,7 @@ var _ = Describe("Facility", func() {
 			It("Paging", func() {
 				var data map[string]interface{}
 				// http.Request
-				pReq := httptest.NewRequest("GET", BASE_URL+"/facilities", nil)
+				pReq := httptest.NewRequest("GET", BASE_URL+"/users", nil)
 				pReq.Header.Set("content-type", "application/json")
 
 				// http.Response
@@ -159,9 +160,9 @@ var _ = Describe("Facility", func() {
 				// Next page
 				// http.Request
 				cursor := pItems[9].(map[string]interface{})
-				cursorName := cursor["name"].(string)
+				cursorEmail := cursor["email"].(string)
 
-				req := httptest.NewRequest("GET", BASE_URL+"/facilities?cursor="+strings.Split(cursorName, " ")[1], nil)
+				req := httptest.NewRequest("GET", BASE_URL+"/users?cursor="+cursorEmail, nil)
 				req.Header.Set("content-type", "application/json")
 				// http.Response
 				resp, _ := App.Test(req)
@@ -169,16 +170,16 @@ var _ = Describe("Facility", func() {
 				assert.Equal(t, nil, err)
 
 				items := data["items"].([]interface{})
+				assert.Equal(t, 10, len(items))
 
 				for i, v := range items {
 					current := v.(map[string]interface{})
-					currentName := current["name"].(string)
+					currentEmail := current["email"].(string)
 					if i == 0 {
-						cursorName := cursor["name"].(string)
-						assert.Equal(t, true, currentName > cursorName)
+						assert.Equal(t, true, currentEmail > cursorEmail)
 					} else {
-						prevName := items[i-1].(map[string]interface{})["name"].(string)
-						assert.Equal(t, true, currentName > prevName)
+						prevEmail := items[i-1].(map[string]interface{})["email"].(string)
+						assert.Equal(t, true, currentEmail > prevEmail)
 					}
 				}
 			})
@@ -186,12 +187,12 @@ var _ = Describe("Facility", func() {
 	})
 
 	Context("Mutation", func() {
-		It("Create a facility", func() {
+		It("Create a user", func() {
 			var data map[string]interface{}
-			input := helper.SeedFacilityInput()
+			input := helper.SeedUserInput()
 			bsInput, _ := helper.FormatJson(input, false)
 			// http.Request
-			req := httptest.NewRequest("POST", BASE_URL+"/facilities", bytes.NewReader(bsInput))
+			req := httptest.NewRequest("POST", BASE_URL+"/users", bytes.NewReader(bsInput))
 			req.Header.Set("content-type", "application/json")
 
 			// http.Response
@@ -199,19 +200,24 @@ var _ = Describe("Facility", func() {
 			err := json.NewDecoder(resp.Body).Decode(&data)
 			assert.Equal(t, nil, err)
 			item := data["item"].(map[string]interface{})
-			assert.Equal(t, input["name"].(string), item["name"].(string))
-			assert.Equal(t, input["phone"].(string), item["phone"].(string))
-			assert.Equal(t, input["status"].(string), item["status"].(string))
+			expectTypes := input["types"].([]string)
+			actualTypes := item["types"].([]interface{})
+
+			assert.Equal(t, input["fullName"].(string), item["fullName"].(string))
+			assert.Equal(t, input["email"].(string), item["email"].(string))
+			assert.Equal(t, input["gender"].(string), item["gender"].(string))
+			assert.Equal(t, input["dob"].(string), item["dob"].(string))
+			assert.Equal(t, len(expectTypes), len(actualTypes))
+			assert.Equal(t, expectTypes[0], actualTypes[0])
 		})
 
-		It("Update a facility", func() {
+		It("Update a user", func() {
 			var data map[string]interface{}
-			mockData := helper.SeedFacility()
-			helper.FormatJson(mockData, false)
-			input := helper.SeedFacilityInput()
+			mockData := helper.SeedUser()
+			input := helper.SeedUserInput()
 			bsInput, _ := helper.FormatJson(input, false)
 			// http.Request
-			req := httptest.NewRequest("PUT", BASE_URL+"/facilities/"+mockData.ID.Hex(), bytes.NewReader(bsInput))
+			req := httptest.NewRequest("PUT", BASE_URL+"/users/"+mockData.ID.Hex(), bytes.NewReader(bsInput))
 			req.Header.Set("content-type", "application/json")
 
 			// http.Response
@@ -220,16 +226,22 @@ var _ = Describe("Facility", func() {
 
 			assert.Equal(t, nil, err)
 			item := data["item"].(map[string]interface{})
-			assert.Equal(t, input["name"].(string), item["name"].(string))
-			assert.Equal(t, input["phone"].(string), item["phone"].(string))
-			assert.Equal(t, input["status"].(string), item["status"].(string))
+			expectTypes := input["types"].([]string)
+			actualTypes := item["types"].([]interface{})
+
+			assert.Equal(t, input["fullName"].(string), item["fullName"].(string))
+			assert.Equal(t, input["email"].(string), item["email"].(string))
+			assert.Equal(t, input["gender"].(string), item["gender"].(string))
+			assert.Equal(t, input["dob"].(string), item["dob"].(string))
+			assert.Equal(t, len(expectTypes), len(actualTypes))
+			assert.Equal(t, expectTypes[0], actualTypes[0])
 		})
 
-		It("Delete a facility", func() {
+		It("Delete a user", func() {
 			var data map[string]interface{}
-			mockData := helper.SeedFacility()
+			mockData := helper.SeedUser()
 			// http.Request
-			req := httptest.NewRequest("DELETE", BASE_URL+"/facilities/"+mockData.ID.Hex(), nil)
+			req := httptest.NewRequest("DELETE", BASE_URL+"/users/"+mockData.ID.Hex(), nil)
 			req.Header.Set("content-type", "application/json")
 
 			// http.Response
