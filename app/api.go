@@ -1,6 +1,7 @@
 package app
 
 import (
+	"base/app/controller/appointment"
 	"base/app/controller/facilities"
 	questionset "base/app/controller/question-set"
 	"base/app/controller/user"
@@ -24,7 +25,7 @@ func InitRoute(app *fiber.App) {
 	qs.Get("/", questionset.GetAll(DB))
 	qs.Put("/:id", questionset.UpdateById(DB))
 
-	// facilities
+	// Facilities
 	facilitiesRoutes := v1.Group("/facilities")
 	facilitiesRoutes.Post("/", facilities.Create(DB))
 	facilitiesRoutes.Delete("/:id", facilities.Delete(DB))
@@ -33,7 +34,7 @@ func InitRoute(app *fiber.App) {
 	facilitiesRoutes.Get("/", facilities.GetAll(DB))
 	facilitiesRoutes.Get("/:id", facilities.GetById(DB))
 
-	// user
+	// User
 	usersRoutes := v1.Group("/users")
 	usersRoutes.Post("/", user.Create(DB))
 	usersRoutes.Delete("/:id", user.Delete(DB))
@@ -41,4 +42,10 @@ func InitRoute(app *fiber.App) {
 
 	usersRoutes.Get("/:id", user.GetById(DB))
 	usersRoutes.Get("/", user.GetAll(DB))
+
+	// Appointment
+	appointmentRoutes := v1.Group("/appointments")
+	appointmentRoutes.Post("/", appointment.Create(DB))
+	appointmentRoutes.Delete("/:id", appointment.Delete(DB))
+	appointmentRoutes.Put("/:id", appointment.Update(DB))
 }

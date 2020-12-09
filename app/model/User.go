@@ -14,7 +14,7 @@ type User struct {
 	Email     string              `bson:"email" json:"email" validate:"required,email"`
 	Types     []string            `bson:"types" json:"types" validate:"dive,oneof=Patient Physician Technician 'Facility Admin'"`
 	CreatedAt time.Time           `bson:"createdAt" json:"createdAt"`
-	UpdatedAt time.Time           `baon:"updatedAt" json:"updatedAt"`
+	UpdatedAt time.Time           `bson:"updatedAt" json:"updatedAt"`
 	Facility  *primitive.ObjectID `bson:"facility,omitempty" json:"facility,omitempty"`
 }
 

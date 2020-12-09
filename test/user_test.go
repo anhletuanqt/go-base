@@ -48,6 +48,7 @@ var _ = Describe("User", func() {
 				err := json.NewDecoder(resp.Body).Decode(&data)
 				assert.Equal(t, nil, err)
 				items := data["items"].([]interface{})
+				// helper.FormatJson(items, true)
 				assert.Equal(t, 10, len(items))
 
 				for i, v := range items {
