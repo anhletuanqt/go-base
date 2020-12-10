@@ -2,6 +2,7 @@ package app
 
 import (
 	"base/app/controller/appointment"
+	"base/app/controller/auth"
 	"base/app/controller/facilities"
 	questionset "base/app/controller/question-set"
 	"base/app/controller/user"
@@ -16,6 +17,11 @@ func InitRoute(app *fiber.App) {
 
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
+
+	// Auth
+	authRoutes := v1.Group("/auth")
+	authRoutes.Post("/sign-up", auth.SignUp(DB))
+	authRoutes.Post("/sign-in", auth.SignIn(DB))
 
 	// Question set
 	qs := v1.Group("/qs")
@@ -46,6 +52,7 @@ func InitRoute(app *fiber.App) {
 	// Appointment
 	appointmentRoutes := v1.Group("/appointments")
 	appointmentRoutes.Post("/", appointment.Create(DB))
+	appointmentRoutes.Post("/approve", appointment.Approve(DB))
 	appointmentRoutes.Delete("/:id", appointment.Delete(DB))
 	appointmentRoutes.Put("/:id", appointment.Update(DB))
 }

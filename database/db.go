@@ -13,6 +13,7 @@ import (
 )
 
 var db *mongo.Database
+var client *mongo.Client
 
 func Connect(conf *config.Config) {
 	clientOptions := options.Client().ApplyURI(conf.Mongo.URL)
@@ -49,6 +50,10 @@ func Connect(conf *config.Config) {
 
 func GetDB() *mongo.Database {
 	return db
+}
+
+func GetClient() *mongo.Client {
+	return client
 }
 
 func createQuestionSetIndex(db *mongo.Database) error {

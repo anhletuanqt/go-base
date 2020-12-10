@@ -8,7 +8,7 @@ import (
 
 type Appointment struct {
 	ID              primitive.ObjectID   `bson:"_id,omitempty" json:"_id"`
-	Patient         *primitive.ObjectID  `bson:"patient" json:"patient" validate:"required"`
+	Patient         *primitive.ObjectID  `bson:"patient" json:"patient"`
 	Technician      *primitive.ObjectID  `bson:"technician" json:"technician"`
 	Physician       *primitive.ObjectID  `bson:"physician" json:"physician"`
 	Facility        *primitive.ObjectID  `bson:"facility" json:"facility" validate:"required"`

@@ -22,4 +22,5 @@ func new() *fiber.App {
 func initMiddleware(app *fiber.App) {
 	app.Use(recover.New())
 	app.Use(logger.New())
+	app.Use(jwtAuth)
 }
