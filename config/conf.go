@@ -16,7 +16,8 @@ type Mong struct {
 
 func New() *Config {
 	mongo := Mong{
-		URL:    "mongodb://localhost:27017",
+		URL: "mongodb://localhost:27017",
+		// URL:    "mongodb+srv://username:password@cluster0.nhxmu.mongodb.net/test?retryWrites=true&w=majority",
 		DBName: "test",
 	}
 	server := Server{

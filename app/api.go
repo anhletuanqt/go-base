@@ -52,7 +52,7 @@ func InitRoute(app *fiber.App) {
 	// Appointment
 	appointmentRoutes := v1.Group("/appointments")
 	appointmentRoutes.Post("/", appointment.Create(DB))
-	appointmentRoutes.Post("/approve", appointment.Approve(DB))
+	appointmentRoutes.Post("/:id/approve", appointment.Approve(DB))
 	appointmentRoutes.Delete("/:id", appointment.Delete(DB))
 	appointmentRoutes.Put("/:id", appointment.Update(DB))
 }

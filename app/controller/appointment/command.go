@@ -158,7 +158,9 @@ func Approve(db *mongo.Database) fiber.Handler {
 
 			// Find appointment
 			filter := bson.D{{"_id", objID}}
-			update := bson.D{{"status", "Approved"}}
+			update := map[string]interface{}{
+				"$set": bson.D{{"status", "Approved"}},
+			}
 			opts := options.FindOneAndUpdate()
 			opts.SetReturnDocument(1)
 			if err = collection.FindOneAndUpdate(sc, filter, update, opts).Decode(&appointment); err != nil {
@@ -166,7 +168,10 @@ func Approve(db *mongo.Database) fiber.Handler {
 			}
 
 			// Find admin user
-			userId := authUser["_id"].(string)
+			userId, ok := authUser["_id"].(string)
+			if !ok {
+				return errors.Wrap(errors.New("userId is not string"), "")
+			}
 			userObjID, err := primitive.ObjectIDFromHex(userId)
 			userOpts := options.FindOne()
 			userOpts.SetProjection(map[string]interface{}{
@@ -181,11 +186,11 @@ func Approve(db *mongo.Database) fiber.Handler {
 				return errors.Wrap(err, "")
 			}
 
-			facilityID := appointment["facility"].(string)
+			facilityID := appointment["facility"].(primitive.ObjectID)
 			isAdmin := checkFacilityAdmin(map[string]interface{}{
-				"facility": user["facility"],
+				"facility": user["facility"].(primitive.ObjectID).Hex(),
 				"types":    user["types"],
-			}, facilityID)
+			}, facilityID.Hex())
 
 			if !isAdmin {
 				return errors.Wrap(errors.New("Auth user is not Facility Admin"), "")
@@ -204,7 +209,7 @@ func Approve(db *mongo.Database) fiber.Handler {
 
 		return c.JSON(fiber.Map{
 			"isSuccess": true,
-			"item":      "item",
+			"item":      appointment,
 		})
 	}
 }
